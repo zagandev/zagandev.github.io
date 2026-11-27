@@ -1,0 +1,51 @@
+---
+title: Retro Render Pipeline
+summary: "Been experimenting with Unity and learning about the Scriptable Render Pipeline (SRP) to make a custom one and start diving deep into the graphics pipeline while trying to mimic a retro-style rendering."
+categories:
+  - rendering-shaders
+  - technical-art-tools
+primaryCategory: rendering-shaders
+engine: Unity (custom SRP)
+cover: ../../assets/projects/ps1-rendering-pipeline/rendering-pipeline-testscene-01.webp
+coverAlt: Retro Render Pipeline test scene
+media:
+  - type: image
+    src: '/src/assets/projects/ps1-rendering-pipeline/rendering-pipeline-testscene-01.webp'
+    alt: Retro Render Pipeline test scene
+  - type: mp4
+    src: '/src/assets/projects/ps1-rendering-pipeline/render_scene.mp4' 
+  - type: image
+    src: '/src/assets/projects/ps1-rendering-pipeline/second-scene-00-noeffects.webp'
+    alt: Second scene with no effects
+    caption: Rendered at 320x240 (16 bits)
+  - type: image
+    src: '/src/assets/projects/ps1-rendering-pipeline/second-scene-01-dithering.webp'
+    alt: Second scene with dithering
+    caption: Dithering was applied to remove the color banding
+  - type: image
+    src: '/src/assets/projects/ps1-rendering-pipeline/second-scene-02-fog.webp'
+    alt: Second scene with fog
+    caption: Added a distance fog
+  - type: image
+    src: '/src/assets/projects/ps1-rendering-pipeline/second-scene-03-crt.webp'
+    alt: Second scene with CRT effect
+    caption: And finally, a CRT was applied over all
+  - type: mp4
+    src: '/src/assets/projects/ps1-rendering-pipeline/second_scene.mp4'
+featured: true
+order: 1
+draft: false
+---
+
+Been experimenting with Unity and learning about the Scriptable Render Pipeline (SRP) to make a custom one and start diving deep into the graphics pipeline while trying to mimic a retro-style rendering.
+
+The idea was to have a minimum renderer capable of supporting directional, point/spot lights, as well as real-time shadows. And the scene is rendered at 320x240 using the ARGB16 format; when ready, it's presented at 1280x960, and it uses the ARGB32 format.
+
+To add extra details, I implement a bloom effect, dithering, distance fog, and a CRT adapted for HLSL.
+
+## Resources
+
+- [Unity documentation](https://docs.unity3d.com/2022.3/Documentation/Manual/).
+- [Catlike Coding tutorial series: Custom SRP](https://catlikecoding.com/unity/tutorials/custom-srp/).
+- [Original CRT shader by TimothyLottes](https://www.shadertoy.com/view/MtSfRK).
+- [3D Scene made by Elbolillo](https://sketchfab.com/Elbolilloduro).

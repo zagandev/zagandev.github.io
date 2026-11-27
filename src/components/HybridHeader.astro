@@ -1,0 +1,135 @@
+---
+import { site } from '@/data/site';
+
+interface Props {
+  /** Prefix for in-page links: '/' on project pages, '' on the homepage. */
+  base?: string;
+}
+
+const { base = '' } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href={`${base}#top`}>{site.name}</a>
+    <nav class="nav" aria-label="Primary">
+      <button
+        class="menu-btn"
+        type="button"
+        data-menu-toggle
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="nav-menu"
+      >
+        <svg class="icon-menu" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 6h16M7 12h13M10 18h10" />
+        </svg>
+        <svg class="icon-close" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+
+      <ul class="nav__links" id="nav-menu" data-nav-menu data-open="false">
+        <li><a href={`${base}#work`}>Portfolio</a></li>
+        <li><a href={`${base}#contact`}>Contact</a></li>
+      </ul>
+
+      <button
+        class="theme-btn"
+        type="button"
+        data-theme-toggle
+        aria-pressed="false"
+        aria-label="Switch to dark mode"
+        title="Switch to dark mode"
+      >
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3h.393a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 2.992z" />
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M14.828 14.828a4 4 0 1 0-5.656-5.656 4 4 0 0 0 5.656 5.656M6.343 17.657l-1.414 1.414M6.343 6.343 4.929 4.929M17.657 6.343l1.414-1.414M17.657 17.657l1.414 1.414M4 12H2M12 4V2M20 12h2M12 20v2"
+          />
+        </svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<script is:inline>
+  (function () {
+    var button = document.querySelector('[data-menu-toggle]');
+    var menu = document.querySelector('[data-nav-menu]');
+    if (!button || !menu) return;
+
+    function close() {
+      button.setAttribute('aria-expanded', 'false');
+      button.setAttribute('aria-label', 'Open menu');
+      menu.dataset.open = 'false';
+    }
+
+    button.addEventListener('click', function () {
+      var open = button.getAttribute('aria-expanded') !== 'true';
+      button.setAttribute('aria-expanded', String(open));
+      button.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      menu.dataset.open = String(open);
+    });
+
+    menu.addEventListener('click', function (event) {
+      if (event.target.closest('a')) close();
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') close();
+    });
+  })();
+</script>
+
+<script is:inline>
+  (function () {
+    var root = document.documentElement;
+    var button = document.querySelector('[data-theme-toggle]');
+    var meta = document.querySelector('meta[name="color-scheme"]');
+    var storageKey = 'portfolio-theme';
+
+    function apply(theme, save) {
+      root.dataset.theme = theme;
+      if (meta) meta.setAttribute('content', theme);
+
+      var next = theme === 'dark' ? 'light' : 'dark';
+      if (button) {
+        button.setAttribute('aria-pressed', String(theme === 'dark'));
+        button.setAttribute('aria-label', 'Switch to ' + next + ' mode');
+        button.title = 'Switch to ' + next + ' mode';
+      }
+
+      if (save) {
+        try {
+          localStorage.setItem(storageKey, theme);
+        } catch (error) {
+          /* Choice still applies for this visit. */
+        }
+      }
+    }
+
+    apply(root.dataset.theme === 'dark' ? 'dark' : 'light', false);
+
+    if (button) {
+      button.addEventListener('click', function () {
+        apply(root.dataset.theme === 'dark' ? 'light' : 'dark', true);
+      });
+    }
+
+    var system = window.matchMedia('(prefers-color-scheme: dark)');
+    system.addEventListener('change', function (event) {
+      var saved = null;
+      try {
+        saved = localStorage.getItem(storageKey);
+      } catch (error) {
+        saved = null;
+      }
+      if (saved !== 'light' && saved !== 'dark') {
+        apply(event.matches ? 'dark' : 'light', false);
+      }
+    });
+  })();
+</script>

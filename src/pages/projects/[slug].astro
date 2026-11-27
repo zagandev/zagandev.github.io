@@ -1,0 +1,161 @@
+---
+import { render } from 'astro:content';
+import HybridHeader from '@/components/HybridHeader.astro';
+import PageHead from '@/components/PageHead.astro';
+import finalCss from '@/styles/portfolio.css?raw';
+import { site } from '@/data/site';
+import { mediaUrl } from '@/lib/media';
+import { CATEGORIES, getProjects, primaryCategory, type Project } from '@/lib/projects';
+import { url } from '@/lib/url';
+
+interface Props {
+  project: Project;
+}
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+type MediaItem = Project['data']['media'][number];
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+
+const displayName = 'Gaston Zabala - Technical Artist';
+
+const categoryLabel =
+  CATEGORIES.find((category) => category.id === primaryCategory(project))?.label ??
+  site.role;
+
+const metaParts = [categoryLabel, project.data.engine]
+  .filter((part): part is string => Boolean(part));
+
+function embedSrc(item: MediaItem): string {
+  if (item.type === 'youtube') {
+    const id =
+      item.src.match(
+        /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?(?:.*&)?v=))([\w-]{11})/,
+      )?.[1] ?? item.src;
+    return `https://www.youtube-nocookie.com/embed/${id}`;
+  }
+  const id = item.src.match(/vimeo\.com\/(?:video\/)?(\d+)/)?.[1] ?? item.src;
+  return `https://player.vimeo.com/video/${id}`;
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <PageHead
+      title={`${project.data.title} - ${displayName}`}
+      description={project.data.summary}
+      canonicalPath={`/projects/${project.id}/`}
+    />
+    <style is:inline set:html={finalCss} />
+    {
+      import.meta.env.DEV && (
+        <style is:inline>
+          :root { --font: "Google Sans Code", ui-monospace, "Courier New", monospace; }
+        </style>
+      )
+    }
+  </head>
+
+  <body id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <HybridHeader base={url('/')} />
+
+    <main id="main" tabindex="-1">
+      <section class="project-page" aria-labelledby="project-title">
+        <div class="container">
+          <a class="back-link" href={url('/#work')}>
+            <span aria-hidden="true">←</span> Back to Portfolio
+          </a>
+
+          <div class="project-head">
+            <p class="project-meta mono">{metaParts.join(' · ')}</p>
+            <h1 class="project-title" id="project-title">{project.data.title}</h1>
+            <div class="prose project-prose">
+              <Content />
+            </div>
+            {
+              project.data.technologies.length > 0 && (
+                <ul class="tags project-tags">
+                  {project.data.technologies.map((tech) => (
+                    <li>{tech}</li>
+                  ))}
+                </ul>
+              )
+            }
+          </div>
+
+          {
+            project.data.media.length > 0 ? (
+              <div class="media-list">
+                {project.data.media.map((item, index) => (
+                  <figure class="media-item">
+                    <div class="media-frame">
+                      {item.type === 'image' || item.type === 'gif' ? (
+                        <img
+                          src={mediaUrl(item.src)}
+                          alt={item.alt}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ) : item.type === 'mp4' ? (
+                        <video
+                          src={mediaUrl(item.src)}
+                          controls
+                          playsinline
+                          preload="metadata"
+                          aria-label={item.caption || item.alt || `Project clip ${index + 1}`}
+                        />
+                      ) : (
+                        <iframe
+                          src={embedSrc(item)}
+                          title={item.caption || `Embedded video ${index + 1}`}
+                          loading="lazy"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowfullscreen
+                        />
+                      )}
+                    </div>
+                    {item.caption && (
+                      <figcaption class="mono">{item.caption}</figcaption>
+                    )}
+                  </figure>
+                ))}
+              </div>
+            ) : (
+              <div class="media-placeholder" role="note">
+                <p class="media-placeholder__label mono">No media added yet</p>
+                <p>
+                  Add entries to this project's <code>media</code> frontmatter
+                  array to show images, GIFs, YouTube, Vimeo or MP4 videos here.
+                </p>
+                <pre class="mono"><code>media:
+  - type: image
+    src: /src/assets/projects/your-image.png
+    alt: Describe the image
+  - type: youtube
+    src: https://www.youtube.com/watch?v=VIDEO_ID
+  - type: vimeo
+    src: https://vimeo.com/VIDEO_ID
+  - type: mp4
+    src: /src/assets/projects/your-clip.mp4</code></pre>
+              </div>
+            )
+          }
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container mono">© {new Date().getFullYear()} {displayName}</div>
+    </footer>
+  </body>
+</html>

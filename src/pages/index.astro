@@ -1,0 +1,240 @@
+---
+import { Image } from 'astro:assets';
+import HybridHeader from '@/components/HybridHeader.astro';
+import PageHead from '@/components/PageHead.astro';
+import finalCss from '@/styles/portfolio.css?raw';
+import { site } from '@/data/site';
+import { CATEGORIES, getProjects, projectUrl } from '@/lib/projects';
+import { url } from '@/lib/url';
+
+const displayName = 'Gaston Zabala - Technical Artist';
+const year = new Date().getFullYear();
+const location = 'Buenos Aires, Argentina';
+
+const projects = await getProjects();
+const cards = projects.map((project) => {
+  const category = CATEGORIES.find(
+    (candidate) =>
+      candidate.id === (project.data.primaryCategory ?? project.data.categories[0]),
+  );
+  return {
+    project,
+    cover: project.data.cover ?? null,
+    meta: [category?.label ?? site.role, project.data.engine]
+      .filter(Boolean)
+      .join(' · '),
+  };
+});
+
+const toolboxGroups = [
+  { label: 'Languages', tags: ['C#', 'C++', 'HLSL'] },
+  { label: 'Engines', tags: ['Unity', 'Unreal Engine'] },
+  {
+    label: 'DCC Tools',
+    tags: ['Blender', 'Photoshop', 'Substance 3D Designer'],
+  },
+  {
+    label: 'Tools',
+    tags: ['VisualStudio/Rider', 'Git', 'NVidia Nsight Graphics', 'RenderDoc'],
+  },
+] as const;
+
+// Owner-supplied roles, newest first. No responsibilities or achievements were
+// supplied, so the panels show only the supplied date, role, organisation and
+// location. Only the current entry uses the hero eyebrow accent.
+const experience = [
+  {
+    date: 'Jun. 2023 - Present',
+    role: 'Technical Artist',
+    organisation: 'Whiteboard Games',
+    subtitle: 'Buenos Aires, Argentina · Remote',
+    current: true,
+  },
+  {
+    date: 'Mar. 2022 - Jun. 2023',
+    role: 'Senior Technical Artist',
+    organisation: 'Jam City',
+    subtitle: 'Buenos Aires, Argentina · Remote',
+    current: false,
+  },
+  {
+    date: 'Jul. 2020 - Mar. 2022',
+    role: 'Semi-Senior Technical Artist',
+    organisation: 'Jam City',
+    subtitle: 'Buenos Aires, Argentina · Remote',
+    current: false,
+  },
+  {
+    date: 'Mar. 2020 - Jul. 2020',
+    role: 'Professor of Visual Effects',
+    organisation: 'Escuela Da Vinci',
+    subtitle: 'Buenos Aires, Argentina · Remote',
+    current: false,
+  },
+] as const;
+
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <PageHead title={displayName} description={site.description} canonicalPath="/" />
+    <style is:inline set:html={finalCss} />
+    {
+      import.meta.env.DEV && (
+        <style is:inline>
+          :root { --font: "Google Sans Code", ui-monospace, "Courier New", monospace; }
+        </style>
+      )
+    }
+  </head>
+
+  <body id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <HybridHeader />
+
+    <main id="main" tabindex="-1">
+      <section class="hero" aria-labelledby="home-title">
+        <div class="container">
+          <p class="eyebrow">{site.role} · {location}</p>
+          <h1 id="home-title">{site.name}</h1>
+          <p class="hero__lead">{site.intro}</p>
+        </div>
+      </section>
+
+      <section id="work" class="section" aria-labelledby="work-title">
+        <div class="container">
+          <div class="section__head">
+            <div>
+              <h2 id="work-title">Portfolio</h2>
+            </div>
+          </div>
+
+          <ul class="grid">
+            {
+              cards.map(({ project, cover, meta }) => (
+                <li class="grid__item">
+                  <article class="card">
+                    <a class="card__link" href={projectUrl(project)}>
+                      <div class="card__media">
+                        {cover && (
+                          <Image
+                            src={cover}
+                            alt={project.data.coverAlt ?? project.data.title}
+                            widths={[360, 540, 720]}
+                            sizes="(min-width: 901px) 360px, (min-width: 681px) 45vw, 100vw"
+                            loading="lazy"
+                            quality={82}
+                          />
+                        )}
+                        <span class="card__tint" aria-hidden="true" />
+                        <div class="card__overlay">
+                          <p class="card__overlay-desc">{project.data.summary}</p>
+                          <ul class="card__tags">
+                            {project.data.technologies.slice(0, 4).map((tech) => (
+                              <li>{tech}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      <div class="card__body">
+                        <p class="card__meta mono">{meta}</p>
+                        <h3 class="card__title">{project.data.title}</h3>
+                      </div>
+                    </a>
+                  </article>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </section>
+
+      <section id="experience" class="section" aria-labelledby="experience-title">
+        <div class="container">
+          <div class="section__head">
+            <div>
+              <h2 id="experience-title">Experience</h2>
+            </div>
+          </div>
+          <ol class="experience-list">
+            {
+              experience.map((entry) => (
+                <li class:list={['experience-panel', entry.current && 'experience-panel--current']}>
+                  <p class="experience-panel__label mono">{entry.date}</p>
+                  <h3 class="experience-panel__title">
+                    {entry.role} · <span class="experience-panel__org">{entry.organisation}</span>
+                  </h3>
+                  <p class="experience-panel__subtitle">{entry.subtitle}</p>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </section>
+
+      <section id="toolbox" class="section" aria-labelledby="toolbox-title">
+        <div class="container">
+          <div class="section__head">
+            <div>
+              <h2 id="toolbox-title">Toolbox</h2>
+            </div>
+          </div>
+          <div class="toolbox__grid">
+            {
+              toolboxGroups.map((group) => (
+                <div class="toolbox__group">
+                  <h3 class="mono">{group.label}</h3>
+                  <ul class="tags">
+                    {group.tags.map((tech) => (
+                      <li>{tech}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" class="section" aria-labelledby="contact-title">
+        <div class="container">
+          <div class="section__head">
+            <div>
+              <h2 id="contact-title">Contact</h2>
+            </div>
+          </div>
+          <div class="contact__actions">
+            <a class="btn" href={`mailto:${site.email}`}>{site.email}</a>
+            <a
+              class="btn btn--ghost"
+              href={url('/gaston_zabala_resume.pdf')}
+            >
+              View Resume (PDF)
+            </a>
+          </div>
+          <ul class="social">
+            {
+              site.socials.map((social) => (
+                <li>
+                  <a
+                    href={social.href}
+                    target="_blank"
+                    rel="me noopener noreferrer"
+                  >
+                    {social.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container mono">© {year} {displayName}</div>
+    </footer>
+  </body>
+</html>

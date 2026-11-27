@@ -1,0 +1,45 @@
+---
+import HybridHeader from '@/components/HybridHeader.astro';
+import PageHead from '@/components/PageHead.astro';
+import finalCss from '@/styles/portfolio.css?raw';
+import { url } from '@/lib/url';
+
+const displayName = 'Gaston Zabala - Technical Artist';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <PageHead
+      title={`Page not found - ${displayName}`}
+      description="The page you were looking for does not exist."
+      canonicalPath="/404.html"
+      noindex
+    />
+    <style is:inline set:html={finalCss} />
+  </head>
+
+  <body id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <HybridHeader base={url('/')} />
+
+    <main id="main" tabindex="-1">
+      <section class="hero" aria-labelledby="not-found-title">
+        <div class="container">
+          <p class="eyebrow">Error / 404</p>
+          <h1 id="not-found-title">Page not found</h1>
+          <p class="hero__lead">
+            The page may have moved. The portfolio is the best place to start.
+          </p>
+          <div class="contact__actions">
+            <a class="btn" href={url('/#work')}>View Portfolio</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container mono">© {new Date().getFullYear()} {displayName}</div>
+    </footer>
+  </body>
+</html>

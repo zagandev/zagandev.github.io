@@ -1,0 +1,70 @@
+---
+import { absoluteUrl, url } from '@/lib/url';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  canonicalPath = '/',
+  noindex = false,
+} = Astro.props;
+
+const siteUrl = Astro.site ?? new URL('https://example.github.io');
+const canonical = absoluteUrl(canonicalPath, siteUrl);
+const isDev = import.meta.env.DEV;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="icon" href={`${url('/favicon.svg')}?v=2`} type="image/svg+xml" />
+<link rel="canonical" href={canonical} />
+<meta property="og:type" content="website" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+{
+  isDev && (
+    <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </>
+  )
+}
+
+<script is:inline>
+  (function () {
+    var saved = null;
+    try {
+      saved = localStorage.getItem('portfolio-theme');
+    } catch (error) {
+      saved = null;
+    }
+    var theme =
+      saved === 'light' || saved === 'dark'
+        ? saved
+        : window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+    document.documentElement.dataset.theme = theme;
+    var meta = document.querySelector('meta[name="color-scheme"]');
+    if (meta) meta.setAttribute('content', theme);
+  })();
+</script>
